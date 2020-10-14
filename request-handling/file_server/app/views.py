@@ -27,6 +27,8 @@ def file_list(request, date=None):
 
     # Реализуйте алгоритм подготавливающий контекстные данные для шаблона по примеру:
     files = [FileInfo(file) for file in FILES]
+    if date:
+        files = [file for file in files if file.ctime.date() == date]
 
     context = {
         'files': files,
