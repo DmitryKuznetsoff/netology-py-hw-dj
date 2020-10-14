@@ -1,0 +1,63 @@
+<!DOCTYPE html>{% load static %}
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Инфляция в России</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+
+  <body>
+    {% block content %}
+      <div class="row">
+        <h1 class="col s12">Инфляция в России</h1>
+        <div class="col s12 m8">
+
+        <!-- Ваша логика -->
+        <table>
+          <colgroup>
+            <col span="13" style="background:White">
+            <col style="background-color:Grey">
+          </colgroup>
+          <tr>
+            {% for header in csv_content.headers %}
+            <th style="background:White"> {{ header }}</th>
+            {% endfor %}
+          </tr>
+
+          <tr>
+            {% for row in csv_content.data %}
+              {% for el in row %}
+              {% if not el.is_inflation_value %}
+              <td> {{ el }} </td>
+              {% else %}
+                {% if el.get_value < 0 %}
+                <td style="background:Green"> {{ el }} </td>
+                  {% elif el.get_value >= 0 and el.get_value <= 0.99 %}
+                  <td style="background:White"> {{ el }} </td>
+                  {% elif el.get_value >= 1 and el.get_value < 2 %}
+                  <td style="background:Pink"> {{ el }} </td>
+                  {% elif el.get_value >= 2.01 and el.get_value < 5 %}
+                  <td style="background:LightCoral"> {{ el }} </td>
+                  {% elif el.get_value > 5 %}
+                  <td style="background:Red"> {{ el }} </td>
+                  {% elif not el.get_value %}
+                  <td style="background:White"> {{ el }} </td>
+                {% endif %}
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+
+        </table>
+        </div>
+      </div>
+    {% endblock %}
+
+  </body>
+</html>
