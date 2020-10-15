@@ -53,6 +53,8 @@ def format_text(value: str, count: int):
     words = re.findall(r'\S+', value)
     if not words:
         return ''
+    elif len(words) < count:
+        return value
     else:
         first = ' '.join(words[:count])
         last = ' '.join(words[-count:])
