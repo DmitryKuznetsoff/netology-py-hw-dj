@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Каталог{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="header">
+            <h1><a href="/catalog">Каталог</a></h1>
+        </div>
+
+        <div class="sort-block">
+            <h6>Сортировать по:
+                <a href="{% url 'catalog' %}?sort=name">названию</a>
+                <a href="{% url 'catalog' %}?sort=min_price">начиная с дешёвых</a>
+                <a href="{% url 'catalog' %}?sort=max_price">начиная с дорогих</a>
+            </h6>
+        </div>
+
+        <div class="content">
+            {% include "product.html" %}
+        </div>
+    </div>
+{% endblock %}
