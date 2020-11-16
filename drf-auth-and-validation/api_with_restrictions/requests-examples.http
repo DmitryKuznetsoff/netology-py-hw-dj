@@ -1,0 +1,68 @@
+# b998f62516684e9b4b5c70fecc6abc0d5b79b625 - admin
+# 5c9deb002396205252e3d0b9f995ca45f3e0f7f9 - test_user
+
+# примеры API-запросов
+
+# получение объявлений
+GET localhost:8000/api/advertisements/
+Content-Type: application/json
+Authorization: Token 5c9deb002396205252e3d0b9f995ca45f3e0f7f9
+
+###
+# создание объявления
+POST localhost:8000/api/advertisements/
+Content-Type: application/json
+Authorization: Token 5c9deb002396205252e3d0b9f995ca45f3e0f7f9
+
+{
+  "title": "Шкаф IKEA",
+  "description": "Срочно"
+}
+
+###
+
+# попытка поменять объявление
+PATCH localhost:8000/api/advertisements/39/
+Content-Type: application/json
+Authorization: Token b998f62516684e9b4b5c70fecc6abc0d5b79b625
+
+{
+  "status": "CLOSED"
+}
+
+###
+
+# фильтрация по создателю
+GET localhost:8000/api/advertisements/?creator=2
+Content-Type: application/json
+
+###
+
+# фильтрация по дате
+GET localhost:8000/api/advertisements/?created_at_before=2020-12-31
+Content-Type: application/json
+
+###
+DELETE localhost:8000/api/advertisements/42/
+Content-Type: application/json
+Authorization: Token 5c9deb002396205252e3d0b9f995ca45f3e0f7f9
+
+###
+GET localhost:8000/api/favorites/
+Content-Type: application/json
+Authorization: Token b998f62516684e9b4b5c70fecc6abc0d5b79b625
+
+
+###
+POST localhost:8000/api/favorites/
+Content-Type: application/json
+Authorization: Token b998f62516684e9b4b5c70fecc6abc0d5b79b625
+
+{
+  "advertisement": 49
+}
+
+###
+DELETE localhost:8000/api/favorites/48/
+Content-Type: application/json
+Authorization: Token b998f62516684e9b4b5c70fecc6abc0d5b79b625
