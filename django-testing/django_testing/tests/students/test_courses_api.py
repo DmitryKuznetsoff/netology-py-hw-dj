@@ -52,10 +52,12 @@ def test_course_filter_by_name(api_client, course_factory, student_factory):
     url = reverse('courses-list')
 
     resp = api_client.get(url, {'name': random_course_name})
-    resp_json = resp.json()[0]
+    resp_json = resp.json()
+    names = {course['name'] for course in resp_json}
+    check_names = set(filter(lambda x: x == random_course_name, names))
 
     assert resp.status_code == HTTP_200_OK
-    assert resp_json['name'] == random_course_name
+    assert names == check_names
 
 
 @pytest.mark.django_db
@@ -113,9 +115,6 @@ def test_course_delete(api_client, course_factory, student_factory):
     )
 )
 def test_with_specific_settings(settings, students_per_course, expected_value):
-    value_to_compare = settings.MAX_STUDENTS_PER_COURSE
-    settings.MAX_STUDENTS_PER_COURSE = students_per_course
-
-    result = 0 <= students_per_course <= value_to_compare
+    result = 0 < students_per_course <= settings.MAX_STUDENTS_PER_COURSE
 
     assert result == expected_value
