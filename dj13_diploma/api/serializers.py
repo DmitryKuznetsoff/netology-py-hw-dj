@@ -4,7 +4,7 @@ from django.db.models import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from api.models import Product, Review, Order, Collection, ProductOrderPosition
+from api.models import Product, Review, Order, Collection, ProductOrderPosition, Favorites
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -87,7 +87,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'user', 'positions', 'status', 'order_sum', 'created_at', 'updated_at')
-        read_only_fields = ['user']
+        read_only_fields = ['user', 'order_sum']
 
     def validate(self, attrs):
         user = self.context['request'].user
@@ -215,3 +215,25 @@ class CollectionSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class FavoritesSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для товаров в избранном
+    """
+
+    class Meta:
+        product_id = 'product'
+
+        model = Favorites
+        fields = ('product_id',)
+
+    def validate(self, attrs):
+        existing_fav = Favorites.objects.filter(user=self.context['request'].user)
+        if attrs['product'] in [fav.product for fav in existing_fav]:
+            raise ValidationError({'error': 'Данное объявление уже есть в избранном'})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data['user_id'] = self.context['request'].user.id
+        return super().create(validated_data)

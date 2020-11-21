@@ -106,7 +106,6 @@ class Collection(models.Model):
         verbose_name_plural = 'Подборки'
         ordering = ['-updated_at', '-created_at']
 
-
     title = models.CharField(max_length=100, blank=False)
     text = models.TextField()
     products = models.ManyToManyField(
@@ -120,6 +119,7 @@ class ProductOrderPosition(models.Model):
     """
     Модель для m2m-связи Product и Order
     """
+
     class Meta:
         db_table = 'api_product_order_position'
 
@@ -143,8 +143,14 @@ class ProductCollection(models.Model):
     """
     Модель для m2m-связи Product и Collection
     """
+
     class Meta:
         db_table = 'api_product_collections'
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     collection = models.ForeignKey(Collection, related_name='products_list', on_delete=models.CASCADE)
+
+
+class Favorites(models.Model):
+    product = models.ForeignKey(Product, related_name='product', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

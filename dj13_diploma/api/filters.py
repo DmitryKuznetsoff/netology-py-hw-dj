@@ -15,7 +15,7 @@ class ProductFilter(filters.FilterSet):
 
 class ReviewFilter(filters.FilterSet):
     user = 'user__id'
-    product = 'product__id'
+    positions = filters.NumberFilter(field_name='product__id')
     created_at = filters.DateFromToRangeFilter(field_name='created_at')
 
     class Meta:
@@ -28,6 +28,7 @@ class OrderFilter(filters.FilterSet):
     updated_at = filters.DateFromToRangeFilter(field_name='created_at')
     order_sum = filters.RangeFilter(field_name='order_sum')
 
+    products = filters.CharFilter(field_name='products__name')
     # TODO: фильтр по продуктам из позиций
 
     class Meta:
