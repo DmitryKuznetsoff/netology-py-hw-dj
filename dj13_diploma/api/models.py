@@ -3,6 +3,17 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 
+class CommonInfo(models.Model):
+    """
+    Абстрактный базовый класс
+    """
+    class Meta:
+        abstract = True
+
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+
+
 class OrderStatusChoices(models.TextChoices):
     """
     TextChoices модель для поля status в модели Order
@@ -12,7 +23,7 @@ class OrderStatusChoices(models.TextChoices):
     DONE = 'DONE', 'Завершён'
 
 
-class Product(models.Model):
+class Product(CommonInfo):
     """
     Модель для товаров
     """
@@ -28,11 +39,9 @@ class Product(models.Model):
     name = models.CharField(max_length=100, blank=False)
     description = models.TextField()
     price = models.FloatField(validators=[MinValueValidator(0)])
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
 
 
-class Review(models.Model):
+class Review(CommonInfo):
     """
     Модель для отзывов
     """
@@ -54,11 +63,9 @@ class Review(models.Model):
             MaxValueValidator(5)
         ]
     )
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
 
 
-class Order(models.Model):
+class Order(CommonInfo):
     """
     Модель для заказов
     """
@@ -89,11 +96,9 @@ class Order(models.Model):
             MinValueValidator(0)
         ]
     )
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
 
 
-class Collection(models.Model):
+class Collection(CommonInfo):
     """
     Модель для подборок товаров
     """
@@ -111,8 +116,6 @@ class Collection(models.Model):
     products = models.ManyToManyField(
         Product, through='ProductCollection'
     )
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
 
 
 class ProductOrderPosition(models.Model):
