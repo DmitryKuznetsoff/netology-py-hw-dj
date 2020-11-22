@@ -151,9 +151,9 @@ class OrderSerializer(serializers.ModelSerializer):
                     ProductOrderPosition.objects.create(product_id=product_id, amount=amount, order=instance)
         validated_data.pop('positions')
 
-        # TODO: сделать, чтобы оно работало:
         # После обновления списка позиций перерсчитываем сумму заказа:
-        order_sum = round(sum(position.product.price * position.amount for position in instance.positions.all()), 2)
+        order_sum = round(sum(position.product.price * position.amount for position in
+                              ProductOrderPosition.objects.filter(order=instance)), 2)
 
         validated_data['order_sum'] = order_sum
         instance = super().update(instance, validated_data)
@@ -209,11 +209,7 @@ class CollectionSerializer(serializers.ModelSerializer):
                 instance.products.add(*new_products)
             validated_data.pop('products_list')
 
-        # Обработка невложенных полей:
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
+        instance = super().update(instance, validated_data)
         return instance
 
 
