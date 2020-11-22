@@ -27,9 +27,7 @@ class OrderFilter(filters.FilterSet):
     created_at = filters.DateFromToRangeFilter(field_name='created_at')
     updated_at = filters.DateFromToRangeFilter(field_name='created_at')
     order_sum = filters.RangeFilter(field_name='order_sum')
-
-    products = filters.CharFilter(field_name='products__name')
-    # TODO: фильтр по продуктам из позиций
+    product_id = filters.NumberFilter(field_name='positions__product_id')
 
     class Meta:
         model = Order
