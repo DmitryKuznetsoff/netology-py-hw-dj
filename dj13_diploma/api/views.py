@@ -1,9 +1,8 @@
 from django.db import transaction
-from django.db.models import ObjectDoesNotExist
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
@@ -83,9 +82,6 @@ class FavoritesViewSet(viewsets.ModelViewSet):
         return Favorites.objects.filter(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
-        try:
-            instance = Favorites.objects.get(user=request.user, product_id=kwargs['pk'])
-        except ObjectDoesNotExist:
-            raise ValidationError({'detail': 'Not found.'})
+        instance = get_object_or_404(Favorites, user=request.user, product_id=kwargs['pk'])
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
