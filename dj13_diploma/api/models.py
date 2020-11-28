@@ -7,6 +7,7 @@ class CommonInfo(models.Model):
     """
     Абстрактный базовый класс
     """
+
     class Meta:
         abstract = True
 
@@ -87,7 +88,8 @@ class Order(CommonInfo):
         Product,
         through='ProductOrderPosition'
     )
-    status = models.TextField(
+    status = models.CharField(
+        max_length=20,
         choices=OrderStatusChoices.choices,
         default=OrderStatusChoices.NEW
     )
