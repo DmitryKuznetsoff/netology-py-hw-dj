@@ -55,7 +55,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'user', 'product', 'text', 'rating']
+        fields = ['id', 'user', 'product', 'text', 'rating', 'created_at', 'updated_at']
 
     def validate(self, attrs):
         if self.context['view'].action == 'create':
@@ -139,8 +139,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         positions = validated_data.get('positions')
         # Обработка вложенного поля 'positions':
-        for position in positions:
-            if positions:
+        if positions:
+            for position in positions:
                 product_id = position['product']['id'].id
                 amount = position['amount']
                 try:
@@ -149,9 +149,9 @@ class OrderSerializer(serializers.ModelSerializer):
                     position_obj.save()
                 except ObjectDoesNotExist:
                     ProductOrderPosition.objects.create(product_id=product_id, amount=amount, order=instance)
-        validated_data.pop('positions')
+            validated_data.pop('positions')
 
-        # После обновления списка позиций перерсчитываем сумму заказа:
+        # После обновления списка позиций пересчитываем сумму заказа:
         order_sum = round(sum(position.product.price * position.amount for position in
                               ProductOrderPosition.objects.filter(order=instance)), 2)
 
@@ -169,7 +169,7 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collection
-        fields = ['title', 'text', 'products_list', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'text', 'products_list', 'created_at', 'updated_at']
 
     def validate(self, attrs):
         products_list = attrs.get('products_list')
@@ -225,8 +225,10 @@ class FavoritesSerializer(serializers.ModelSerializer):
         fields = ('product_id',)
 
     def validate(self, attrs):
-        existing_fav = Favorites.objects.filter(user=self.context['request'].user)
-        if attrs['product'] in [fav.product for fav in existing_fav]:
+        existing_fav = Favorites.objects.filter(
+            user=self.context['request'].user
+        ).values_list('product', flat=True)
+        if attrs['product'] in existing_fav:
             raise ValidationError({'error': 'Данное объявление уже есть в избранном'})
         return attrs
 
