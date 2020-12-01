@@ -1,7 +1,10 @@
+import re
+
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import ObjectDoesNotExist
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 
 from api.models import Product, Review, Order, Collection, ProductOrderPosition, Favorites
@@ -139,8 +142,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         positions = validated_data.get('positions')
         # Обработка вложенного поля 'positions':
-        if positions:
-            for position in positions:
+        for position in positions:
+            if positions:
                 product_id = position['product']['id'].id
                 amount = position['amount']
                 try:
@@ -149,9 +152,9 @@ class OrderSerializer(serializers.ModelSerializer):
                     position_obj.save()
                 except ObjectDoesNotExist:
                     ProductOrderPosition.objects.create(product_id=product_id, amount=amount, order=instance)
-            validated_data.pop('positions')
+        validated_data.pop('positions')
 
-        # После обновления списка позиций пересчитываем сумму заказа:
+        # После обновления списка позиций перерсчитываем сумму заказа:
         order_sum = round(sum(position.product.price * position.amount for position in
                               ProductOrderPosition.objects.filter(order=instance)), 2)
 
@@ -219,19 +222,55 @@ class FavoritesSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        product_id = 'product'
-
         model = Favorites
-        fields = ('product_id',)
+        fields = ('id', 'product',)
 
     def validate(self, attrs):
         existing_fav = Favorites.objects.filter(
             user=self.context['request'].user
         ).values_list('product', flat=True)
-        if attrs['product'] in existing_fav:
+        if attrs['product'].id in existing_fav:
             raise ValidationError({'error': 'Данное объявление уже есть в избранном'})
         return attrs
 
     def create(self, validated_data):
-        validated_data['user_id'] = self.context['request'].user.id
+        validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(source='token.key', read_only=True)
+    email = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Token
+        fields = ['token', 'email', 'password']
+
+    def validate(self, attrs):
+        email = attrs['email']
+        existing_usernames = User.objects.values_list('username', flat=True)
+
+        if email in existing_usernames:
+            raise ValidationError({'email': f'{email} уже зарегистрирован'})
+
+        if not self.check_email(email):
+            raise ValidationError({'email': 'Поле "email" имеет некорректный формат'})
+
+        email = attrs.pop('email')
+        password = attrs.pop('password')
+        new_user = User.objects.create_user(username=email, password=password)
+
+        attrs['user'] = new_user
+
+        return attrs
+
+    @staticmethod
+    def check_email(value):
+        email_check = r'(?P<name>^[A-Za-z0-9\-_]+)@(?P<mail>[A-Za-z0-9\-_]+).(?P<domain>\w+)$'
+        return re.match(email_check, value)
+
+    def create(self, validated_data):
+
+        token = super().create(validated_data)
+        return token.key

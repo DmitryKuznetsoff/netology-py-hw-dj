@@ -1,6 +1,6 @@
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -10,7 +10,7 @@ from api.filters import ProductFilter, ReviewFilter, OrderFilter, CollectionFilt
 from api.models import Product, Review, Order, Collection, Favorites
 from api.permissions import IsOwnerOrAdmin
 from api.serializers import ProductSerializer, ReviewSerializer, OrderSerializer, CollectionSerializer, \
-    FavoritesSerializer
+    FavoritesSerializer, RegisterSerializer
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -85,3 +85,11 @@ class FavoritesViewSet(viewsets.ModelViewSet):
         instance = get_object_or_404(Favorites, user=request.user, product_id=kwargs['pk'])
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RegisterViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    serializer_class = RegisterSerializer
+
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
