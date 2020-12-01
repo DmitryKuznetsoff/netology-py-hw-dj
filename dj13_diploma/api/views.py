@@ -1,10 +1,12 @@
+from django.contrib.auth.models import User
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, mixins
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from api.filters import ProductFilter, ReviewFilter, OrderFilter, CollectionFilter
 from api.models import Product, Review, Order, Collection, Favorites
@@ -87,9 +89,11 @@ class FavoritesViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RegisterViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
-    serializer_class = RegisterSerializer
+class RegisterView(APIView):
 
-    @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+    def post(self, request, format=None):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'token': serializer.initial_data['csrfmiddlewaretoken']}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

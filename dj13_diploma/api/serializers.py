@@ -256,13 +256,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         if not self.check_email(email):
             raise ValidationError({'email': 'Поле "email" имеет некорректный формат'})
-
-        email = attrs.pop('email')
-        password = attrs.pop('password')
-        new_user = User.objects.create_user(username=email, password=password)
-
-        attrs['user'] = new_user
-
         return attrs
 
     @staticmethod
@@ -271,6 +264,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         return re.match(email_check, value)
 
     def create(self, validated_data):
+        email = validated_data.pop('email')
+        password = validated_data.pop('password')
+        new_user = User.objects.create_user(username=email, password=password)
 
+        validated_data['user'] = new_user
         token = super().create(validated_data)
+        self.data.update({'token': token.key})
         return token.key
