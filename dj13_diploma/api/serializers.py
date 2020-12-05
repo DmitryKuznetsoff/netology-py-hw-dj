@@ -142,8 +142,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         positions = validated_data.get('positions')
         # Обработка вложенного поля 'positions':
-        for position in positions:
-            if positions:
+        if positions:
+            for position in positions:
                 product_id = position['product']['id'].id
                 amount = position['amount']
                 try:
@@ -152,7 +152,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     position_obj.save()
                 except ObjectDoesNotExist:
                     ProductOrderPosition.objects.create(product_id=product_id, amount=amount, order=instance)
-        validated_data.pop('positions')
+            validated_data.pop('positions')
 
         # После обновления списка позиций перерсчитываем сумму заказа:
         order_sum = round(sum(position.product.price * position.amount for position in
