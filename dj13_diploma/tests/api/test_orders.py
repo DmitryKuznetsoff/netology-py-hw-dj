@@ -36,7 +36,7 @@ def test_order_list(order_factory, user_api_client):
 @pytest.mark.django_db
 def test_order_filter_by_status(order_factory, admin_api_client):
     orders_list = order_factory()
-    random_status = random.choices(OrderStatusChoices.names)
+    random_status = random.choices(OrderStatusChoices.names)[0]
     url = reverse('orders-list')
 
     resp = admin_api_client.get(url, {'status': random_status})
