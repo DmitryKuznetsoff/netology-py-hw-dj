@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -94,6 +93,6 @@ class RegisterView(APIView):
     def post(self, request, format=None):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({'token': serializer.initial_data['csrfmiddlewaretoken']}, status=status.HTTP_201_CREATED)
+            token = serializer.save()
+            return Response({'token': token}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
