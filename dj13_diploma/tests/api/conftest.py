@@ -123,12 +123,11 @@ def order_update_payload(order_factory):
     url = reverse('orders-detail', args=[order.id])
 
     product_id = order.positions.first().product_id
-    amount = order.positions.first().amount
     payload = {
         'positions': [
             {
                 'product_id': product_id,
-                'amount': amount + 1
+                'amount': randint(1, 10)
             }
         ]
     }
