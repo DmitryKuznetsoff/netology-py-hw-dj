@@ -111,24 +111,23 @@ def test_order_filter_by_product(order_factory, admin_api_client):
 @pytest.mark.django_db
 def test_order_create(user_api_client, order_create_payload):
     url = reverse('orders-list')
+    product_id = order_create_payload['positions'][0]['product_id']
+    amount = order_create_payload['positions'][0]['amount']
 
     resp = user_api_client.post(url, data=order_create_payload, format='json')
     assert resp.status_code == HTTP_201_CREATED
 
     resp_json = resp.json()
-    assert resp_json['positions'][0]['product_id'] == order_create_payload['positions'][0]['product_id'] and \
-           resp_json['positions'][0]['amount'] == order_create_payload['positions'][0]['amount']
+    assert resp_json['positions'][0]['product_id'] == product_id and resp_json['positions'][0]['amount'] == amount
 
 
 @pytest.mark.django_db
-def test_order_update_by_owner(user_api_client, order_factory, user):
-    order = order_factory()[0]
-    order.user = user
-    url = reverse('orders-detail', args=[order.id])
-    product_id = order.positions.first().product_id
-    amount = order.positions.first().amount + 1
+def test_order_update_by_owner(user_api_client, order_update_payload):
+    url, payload = order_update_payload
+    product_id = payload['positions'][0]['product_id']
+    amount = payload['positions'][0]['amount']
 
-    resp = user_api_client.patch(url, data={'positions': [{'product_id': product_id, 'amount': amount}]})
+    resp = user_api_client.patch(url, data=payload, format='json')
     assert resp.status_code == HTTP_200_OK
 
     resp_json = resp.json()
@@ -139,14 +138,26 @@ def test_order_update_by_owner(user_api_client, order_factory, user):
 
 
 @pytest.mark.django_db
-def test_order_update_by_another_user(user, another_user_api_client, order_factory):
-    order = order_factory()[0]
-    url = reverse('orders-detail', args=[order.id])
-    product_id = order.positions.first().product_id
-    amount = order.positions.first().amount + 1
+def test_order_update_by_another_user(another_user_api_client, order_update_payload):
+    url, payload = order_update_payload
 
-    resp = another_user_api_client.patch(url, data={'positions': [{'product_id': product_id, 'amount': amount}]})
+    resp = another_user_api_client.patch(url, data=payload, format='json')
     assert resp.status_code == HTTP_404_NOT_FOUND
+
+
+def test_order_update_by_admin(admin_api_client, order_update_payload):
+    url, payload = order_update_payload
+    product_id = payload['positions'][0]['product_id']
+    amount = payload['positions'][0]['amount']
+
+    resp = admin_api_client.patch(url, data=payload, format='json')
+    assert resp.status_code == HTTP_200_OK
+
+    resp_json = resp.json()
+    check_positions = [position['product_id'] for position in resp_json['positions'] if
+                       position['product_id'] == product_id and position['amount'] == amount
+                       ]
+    assert check_positions
 
 
 @pytest.mark.django_db

@@ -128,7 +128,7 @@ def order_update_payload(order_factory):
         'positions': [
             {
                 'product_id': product_id,
-                'amount': 100
+                'amount': amount + 1
             }
         ]
     }
