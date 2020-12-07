@@ -83,7 +83,7 @@ class FavoritesViewSet(viewsets.ModelViewSet):
         return Favorites.objects.filter(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
-        instance = get_object_or_404(Favorites, user=request.user, product_id=kwargs['pk'])
+        instance = get_object_or_404(Favorites, user=request.user, id=kwargs['pk'])
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
