@@ -106,4 +106,4 @@ url: `/api/v1/favorites/`
 * Реализовать возможность регистрации по почте (без подтверждения почты).
 * Добавить пользователям возможность добавлять товары в избранное.
 
-![](https://drive.google.com/file/d/1eLBw2Q2fIWms8Ez8BI6M4Cl6nRIhIC9P/view?usp=sharing)
+![coverage](res/cov.png)
